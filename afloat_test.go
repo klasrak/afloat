@@ -47,6 +47,54 @@ func TestAdd32(t *testing.T) {
 			delta:        getRandomFloat32(),
 			maxAdditions: 100,
 		},
+		{
+			name:         "Add -1.0 to 1.0",
+			value:        1.0,
+			delta:        -1.0,
+			maxAdditions: 1,
+		},
+		{
+			name:         "Add -1.0 to -1.0",
+			value:        -1.0,
+			delta:        -1.0,
+			maxAdditions: 1,
+		},
+		{
+			name:         "Add negative random value to positive random value",
+			value:        getRandomFloat32(),
+			delta:        getRandomFloat32() * -1.0,
+			maxAdditions: 1,
+		},
+		{
+			name:         "Add negative random value to positive random value 100 times",
+			value:        getRandomFloat32(),
+			delta:        getRandomFloat32() * -1.0,
+			maxAdditions: 100,
+		},
+		{
+			name:         "Add positive random value to negative random value",
+			value:        getRandomFloat32() * -1.0,
+			delta:        getRandomFloat32(),
+			maxAdditions: 1,
+		},
+		{
+			name:         "Add positive random value to negative random value 100 times",
+			value:        getRandomFloat32() * -1.0,
+			delta:        getRandomFloat32(),
+			maxAdditions: 100,
+		},
+		{
+			name:         "Add negative random value to negative random value",
+			value:        getRandomFloat32() * -1.0,
+			delta:        getRandomFloat32() * -1.0,
+			maxAdditions: 1,
+		},
+		{
+			name:         "Add negative random value to negative random value 100 times",
+			value:        getRandomFloat32() * -1.0,
+			delta:        getRandomFloat32() * -1.0,
+			maxAdditions: 100,
+		},
 	}
 
 	for _, tc := range testCases {
