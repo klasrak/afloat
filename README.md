@@ -1,5 +1,4 @@
 <h3 align="center">
-![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
 	<strong>afloat</strong>
 </h3>
 
@@ -7,7 +6,7 @@
 	<a href="https://golang.org/dl/go1.21.0.src.tar.gz"><img
 		alt="Golang version"
 		src="https://img.shields.io/badge/Go-v1.21-blue"></a>
-    <a>[![Generate code coverage badge](https://github.com/klasrak/afloat/actions/workflows/go.yml/badge.svg?branch=master&event=push)](https://github.com/klasrak/afloat/actions/workflows/go.yml)</a>
+    <a><img src="https://img.shields.io/badge/Coverage-100.0%25-brightgreen"></img></a>
         
 </p>
 
