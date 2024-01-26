@@ -21,8 +21,8 @@ type Float32 struct {
 }
 
 // Add adds value to current value and returns the result.
-// It is implemented using atomic.CompareAndSwapUint32.
-// It is safe for concurrent use by multiple goroutines.
+// It is implemented using atomic.CompareAndSwapUint32
+// and is safe for concurrent use by multiple goroutines.
 func (f *Float32) Add(value float32) float32 {
 	for {
 		current := f.Load()
@@ -35,7 +35,15 @@ func (f *Float32) Add(value float32) float32 {
 }
 
 // Load returns the current value.
-// It is safe for concurrent use by multiple goroutines.
+// It is implemented using atomic.LoadUint32
+// and is safe for concurrent use by multiple goroutines.
 func (f *Float32) Load() float32 {
 	return math.Float32frombits(atomic.LoadUint32(&f.value))
+}
+
+// Store sets the new value.
+// It is implemented using atomic.StoreUint32
+// and is safe for concurrent use by multiple goroutines.
+func (f *Float32) Store(value float32) {
+	atomic.StoreUint32(&f.value, math.Float32bits(value))
 }
