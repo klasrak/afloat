@@ -7,7 +7,9 @@ import (
 )
 
 // noCopy is used to ensure that Float32 cannot be copied.
-// If a copy of Float32 is made, the copy will not be usable.
+// Go does not have a native way to prevent copying of types.
+// The `vet` can detect types that cannot be copied because they contain a `Lock()` method.
+// To prevent copying of other types, embed a `noCopy` type.
 // See https://github.com/golang/go/issues/8005#issuecomment-190753527 for more information.
 type noCopy struct{}
 

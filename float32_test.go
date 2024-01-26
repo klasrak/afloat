@@ -100,10 +100,12 @@ func TestAdd(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			v := Float32{}
-			v.Store(tc.value)
+			var (
+				v  Float32
+				wg sync.WaitGroup
+			)
 
-			wg := sync.WaitGroup{}
+			v.Store(tc.value)
 
 			expected := tc.value + (tc.delta * float32(tc.maxAdditions))
 
@@ -148,11 +150,13 @@ func TestLoad(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			v := Float32{}
-			v.Store(getRandomFloat32())
+			var (
+				v               Float32
+				wg              sync.WaitGroup
+				currentExpected chan float32 = make(chan float32, 1)
+			)
 
-			wg := sync.WaitGroup{}
-			currentExpected := make(chan float32, 1)
+			v.Store(getRandomFloat32())
 
 			go func() {
 				for {
@@ -201,4 +205,63 @@ func float32Equals(a, b, tolerance float32) bool {
 	}
 
 	return (d / math.Abs(float64(b))) < float64(tolerance)
+}
+
+func TestStore(t *testing.T) {
+	type testCase struct {
+		name      string
+		maxStores int
+	}
+
+	testCases := []testCase{
+		{
+			name:      "Store correct value",
+			maxStores: 1,
+		},
+		{
+			name:      "Store correct value 100 concurrent accesses",
+			maxStores: 100,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var (
+				v               Float32
+				wg              sync.WaitGroup
+				currentExpected chan float32 = make(chan float32, 1)
+			)
+
+			go func() {
+				for {
+					currentExpected <- getRandomFloat32()
+				}
+			}()
+
+			testStore := func() {
+
+				// Simulate concurrent access
+
+				expected := <-currentExpected // get the expected value
+				v.Store(expected)             // store the value
+
+				// Check if the result matches the expected value.
+				if expected != v.Load() {
+					t.Errorf("Expected %.18f, got %.18f", expected, v.Load())
+				}
+
+			}
+
+			for i := 0; i < tc.maxStores; i++ { // run the testStore function tc.maxStores times to simulate concurrent access
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					testStore()
+				}()
+
+			}
+
+			wg.Wait()
+		})
+	}
 }
