@@ -14,7 +14,7 @@ const (
 	TOLERANCE_F32 = 1e-5 // 10^-5
 )
 
-func TestAdd32(t *testing.T) {
+func TestAdd(t *testing.T) {
 
 	type testCase struct {
 		name         string
@@ -100,7 +100,9 @@ func TestAdd32(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			v := Float32{value: math.Float32bits(tc.value)}
+			v := Float32{}
+			v.Store(tc.value)
+
 			wg := sync.WaitGroup{}
 
 			expected := tc.value + (tc.delta * float32(tc.maxAdditions))
@@ -126,7 +128,7 @@ func getRandomFloat32() float32 {
 	return rand.Float32()*(MAX_F32-MIN_F32) + MIN_F32
 }
 
-func TestLoad32(t *testing.T) {
+func TestLoad(t *testing.T) {
 
 	type testCase struct {
 		name     string
@@ -139,14 +141,16 @@ func TestLoad32(t *testing.T) {
 			maxLoads: 1,
 		},
 		{
-			name:     "Load correct value 100 times",
+			name:     "Load correct value 100 concurrent accesses",
 			maxLoads: 100,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			v := Float32{value: math.Float32bits(getRandomFloat32())}
+			v := Float32{}
+			v.Store(getRandomFloat32())
+
 			wg := sync.WaitGroup{}
 			currentExpected := make(chan float32, 1)
 
