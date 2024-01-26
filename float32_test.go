@@ -160,7 +160,7 @@ func TestLoad(t *testing.T) {
 
 			go func() {
 				for {
-					time.Sleep(1 * time.Millisecond)
+					time.Sleep(500 * time.Microsecond)
 					currentExpected <- v.Add(getRandomFloat32())
 				}
 			}()
@@ -234,6 +234,7 @@ func TestStore(t *testing.T) {
 
 			go func() {
 				for {
+					time.Sleep(500 * time.Microsecond)
 					currentExpected <- getRandomFloat32()
 				}
 			}()
@@ -264,4 +265,54 @@ func TestStore(t *testing.T) {
 			wg.Wait()
 		})
 	}
+}
+
+func TestSwap(t *testing.T) {
+	var v Float32
+
+	v.Store(getRandomFloat32())
+
+	expected := v.Load()
+	got := v.Swap(getRandomFloat32())
+
+	if expected != got {
+		t.Errorf("Expected %.18f, got %.18f", expected, got)
+	}
+}
+
+func TestCompareAndSwap(t *testing.T) {
+	type testCase struct {
+		name     string
+		current  float32
+		new      float32
+		expected bool
+	}
+
+	testCases := []testCase{
+		{
+			name:     "should be true",
+			expected: true,
+		},
+		{
+			name:     "should be false",
+			current:  1,
+			new:      2,
+			expected: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var v Float32
+
+			// v.Load() is zero value for float32
+			// if tc.current is not zero, should be false
+			got := v.CompareAndSwap(tc.current, getRandomFloat32())
+
+			if tc.expected != got {
+				t.Errorf("Expected %t, got %t", tc.expected, got)
+			}
+		})
+	}
+
 }

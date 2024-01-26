@@ -30,7 +30,7 @@ func (f *Float32) Add(value float32) float32 {
 		current := f.Load()
 		result := current + value
 
-		if atomic.CompareAndSwapUint32(&f.value, math.Float32bits(current), math.Float32bits(result)) {
+		if f.CompareAndSwap(current, result) {
 			return result
 		}
 	}
@@ -48,4 +48,18 @@ func (f *Float32) Load() float32 {
 // and is safe for concurrent use by multiple goroutines.
 func (f *Float32) Store(value float32) {
 	atomic.StoreUint32(&f.value, math.Float32bits(value))
+}
+
+// Swap sets the new value and returns the old value.
+// It is implemented using atomic.SwapUint32
+// and is safe for concurrent use by multiple goroutines.
+func (f *Float32) Swap(value float32) float32 {
+	return math.Float32frombits(atomic.SwapUint32(&f.value, math.Float32bits(value)))
+}
+
+// CompareAndSwap executes the compare-and-swap operation for the value.
+// It is implemented using atomic.CompareAndSwapUint32
+// and is safe for concurrent use by multiple goroutines.
+func (f *Float32) CompareAndSwap(current, new float32) bool {
+	return atomic.CompareAndSwapUint32(&f.value, math.Float32bits(current), math.Float32bits(new))
 }
