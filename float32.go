@@ -4,28 +4,39 @@ package afloat
 import (
 	"math"
 	"sync/atomic"
-	"unsafe"
 )
 
-// Add32 adds value to *addr and returns the result.
-// It is implemented using atomic.CompareAndSwapUint32.
-// It is safe for concurrent use by multiple goroutines.
-func Add32(addr *float32, value float32) (result float32) {
-	for {
-		old := *addr
-		result = old + value
+// noCopy is used to ensure that Float32 cannot be copied.
+// If a copy of Float32 is made, the copy will not be usable.
+// See https://github.com/golang/go/issues/8005#issuecomment-190753527 for more information.
+type noCopy struct{}
 
-		if atomic.CompareAndSwapUint32((*uint32)(unsafe.Pointer(addr)), math.Float32bits(old), math.Float32bits(result)) {
-			break
-		}
-	}
+// Lock is a no-op used to ensure that noCopy cannot be copied.
+func (*noCopy) Lock() {}
 
-	return
+// Float32 is an atomic wrapper around a float32
+type Float32 struct {
+	_     noCopy
+	value uint32
 }
 
-// Load32 returns the value at *addr.
+// Add adds value to *addr and returns the result.
+// It is implemented using atomic.CompareAndSwapUint32.
+// It is safe for concurrent use by multiple goroutines.
+func (f *Float32) Add(value float32) float32 {
+	for {
+		current := math.Float32frombits(atomic.LoadUint32(&f.value))
+		result := current + value
+
+		if atomic.CompareAndSwapUint32(&f.value, math.Float32bits(current), math.Float32bits(result)) {
+			return result
+		}
+	}
+}
+
+// Load returns the value at *addr.
 // It is implemented using atomic.LoadUint32.
 // It is safe for concurrent use by multiple goroutines.
-func Load32(addr *float32) (result float32) {
-	return math.Float32frombits(atomic.LoadUint32((*uint32)(unsafe.Pointer(addr))))
+func (f *Float32) Load() (result float32) {
+	return math.Float32frombits(atomic.LoadUint32(&f.value))
 }

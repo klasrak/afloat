@@ -99,6 +99,7 @@ func TestAdd32(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			v := Float32{value: math.Float32bits(tc.value)}
 			wg := sync.WaitGroup{}
 
 			expected := tc.value + (tc.delta * float32(tc.maxAdditions))
@@ -107,13 +108,13 @@ func TestAdd32(t *testing.T) {
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
-					Add32(&tc.value, tc.delta)
+					v.Add(tc.delta)
 				}()
 			}
 
 			wg.Wait()
 
-			if !float32Equals(tc.value, expected, TOLERANCE_F32) {
+			if !float32Equals(expected, v.Load(), TOLERANCE_F32) {
 				t.Errorf("Expected %.18f, got %.18f", expected, tc.value)
 			}
 		})
@@ -147,13 +148,14 @@ func TestLoad32(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			v := Float32{value: math.Float32bits(tc.value)}
 			wg := sync.WaitGroup{}
 			signalUpdate := make(chan struct{}, 1)
 
 			go func() {
 				for {
 					if _, ok := <-signalUpdate; ok {
-						Add32(&tc.value, 1.0)
+						v.Add(1.0)
 						continue
 					}
 					break
@@ -163,12 +165,14 @@ func TestLoad32(t *testing.T) {
 			testLoad := func() {
 
 				// Simulate concurrent access
-				signalUpdate <- struct{}{}  // signal an update, so the value changes
-				result := Load32(&tc.value) // load the value before/concurrently with the update
+				signalUpdate <- struct{}{} // signal an update, so the value changes
+				expected := v.Load()       // load the value before/concurrently with the update
 
-				// Check if the result matches the expected value
-				if tc.value != result {
-					t.Errorf("Expected %.18f, got %.18f", tc.value, result)
+				// Check if the result matches the expected value.
+				// Call Load() again to check if the value is equal to the expected value.
+				result := v.Load()
+				if expected != result {
+					t.Errorf("Expected %.18f, got %.18f", expected, result)
 				}
 
 			}
