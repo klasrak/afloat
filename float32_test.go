@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"sync"
 	"testing"
+	"time"
 )
 
 const (
@@ -129,55 +130,48 @@ func TestLoad32(t *testing.T) {
 
 	type testCase struct {
 		name     string
-		value    float32
 		maxLoads int
 	}
 
 	testCases := []testCase{
 		{
 			name:     "Load correct value",
-			value:    1.0,
 			maxLoads: 1,
 		},
 		{
 			name:     "Load correct value 100 times",
-			value:    1.0,
 			maxLoads: 100,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			v := Float32{value: math.Float32bits(tc.value)}
+			v := Float32{value: math.Float32bits(getRandomFloat32())}
 			wg := sync.WaitGroup{}
-			signalUpdate := make(chan struct{}, 1)
+			currentExpected := make(chan float32, 1)
 
 			go func() {
 				for {
-					if _, ok := <-signalUpdate; ok {
-						v.Add(1.0)
-						continue
-					}
-					break
+					time.Sleep(1 * time.Millisecond)
+					currentExpected <- v.Add(getRandomFloat32())
 				}
 			}()
 
 			testLoad := func() {
 
 				// Simulate concurrent access
-				signalUpdate <- struct{}{} // signal an update, so the value changes
-				expected := v.Load()       // load the value before/concurrently with the update
+
+				expected := <-currentExpected // get the expected value
+				result := v.Load()            // get the result
 
 				// Check if the result matches the expected value.
-				// Call Load() again to check if the value is equal to the expected value.
-				result := v.Load()
 				if expected != result {
 					t.Errorf("Expected %.18f, got %.18f", expected, result)
 				}
 
 			}
 
-			for i := 0; i < tc.maxLoads; i++ {
+			for i := 0; i < tc.maxLoads; i++ { // run the testLoad function tc.maxLoads times to simulate concurrent access
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
@@ -187,7 +181,6 @@ func TestLoad32(t *testing.T) {
 			}
 
 			wg.Wait()
-			close(signalUpdate)
 		})
 	}
 }

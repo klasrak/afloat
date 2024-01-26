@@ -25,7 +25,7 @@ type Float32 struct {
 // It is safe for concurrent use by multiple goroutines.
 func (f *Float32) Add(value float32) float32 {
 	for {
-		current := math.Float32frombits(atomic.LoadUint32(&f.value))
+		current := f.Load()
 		result := current + value
 
 		if atomic.CompareAndSwapUint32(&f.value, math.Float32bits(current), math.Float32bits(result)) {
