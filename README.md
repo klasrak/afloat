@@ -2,13 +2,13 @@
 
 <img align="right" width="200px" height="150px" src="https://i.ibb.co/pR5T8vb/Whats-App-Image-2024-01-26-at-18-26-40.jpg">
 
-Generate a coverage badge like this one for your Golang projects without uploading results to a third party.
+The `afloat` package provides a wrapper for atomic operations for the `float32` and `float64` types, which are not natively supported by the `sync/atomic` package.
 
 ![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
 ![Go](https://img.shields.io/badge/Go-v1.21-blue)
 
 
-### How to use
+### How to use - WIP
 
 ```go
 package main
