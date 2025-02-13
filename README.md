@@ -5,6 +5,7 @@
 The `afloat` package provides a wrapper for atomic operations for the `float32` and `float64` types, which are not natively supported by the `sync/atomic` package.
 
 ![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-20.0%25-red)
 ![Go](https://img.shields.io/badge/Go-v1.21-blue)
 
 
