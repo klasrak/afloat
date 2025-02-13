@@ -22,7 +22,8 @@ import (
 
 func main() {
 	var (
-		v  afloat.Float32
+		f32  afloat.Float32
+        f64  afloat.Float64
 		wg sync.WaitGroup
 	)
 
@@ -31,12 +32,14 @@ func main() {
 
 		go func() {
 			defer wg.Done()
-			v.Add(1.0) // Concurrently add a float32 to v
+			f32.Add(1.0) // Concurrently add a float32 to f32
+            f64.Add(1.0) // Concurrently add a float64 to f64
 		}()
 	}
 
 	wg.Wait()
 
-	fmt.Println(v.Load()) // 100
+	fmt.Println(f32.Load()) // 100
+    fmt.Println(f64.Load()) // 100
 }
 ```
